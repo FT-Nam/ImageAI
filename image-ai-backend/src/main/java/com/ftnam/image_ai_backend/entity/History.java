@@ -13,7 +13,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class ImageHistory {
+public class History {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -26,6 +26,8 @@ public class ImageHistory {
     private String imageUrl;
 
     private String result;
+
+    private float confident;
 
     @Column(name = "created_at")
     @CreationTimestamp

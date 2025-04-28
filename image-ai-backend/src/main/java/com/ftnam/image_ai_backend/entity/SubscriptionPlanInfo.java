@@ -1,6 +1,5 @@
 package com.ftnam.image_ai_backend.entity;
 
-import com.ftnam.image_ai_backend.enums.SubscriptionPlan;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -18,7 +17,7 @@ public class SubscriptionPlanInfo {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "subscription")
-    private SubscriptionPlan subscription;
+    private com.ftnam.image_ai_backend.enums.SubscriptionPlan subscription;
 
     @Column(name = "weekly_credit")
     private int weeklyCredit;

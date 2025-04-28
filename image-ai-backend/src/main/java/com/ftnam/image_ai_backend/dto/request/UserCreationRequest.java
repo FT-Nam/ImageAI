@@ -1,14 +1,7 @@
 package com.ftnam.image_ai_backend.dto.request;
 
-import com.ftnam.image_ai_backend.entity.ImageHistory;
-import com.ftnam.image_ai_backend.enums.SubscriptionPlan;
-import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
 import lombok.*;
-import org.hibernate.annotations.CreationTimestamp;
-
-import java.time.LocalDateTime;
-import java.util.List;
 
 @Getter
 @Setter

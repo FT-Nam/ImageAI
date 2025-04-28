@@ -7,7 +7,6 @@ import jakarta.validation.constraints.Pattern;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -44,10 +43,13 @@ public class User {
     @Column(name = "credit_reset_at")
     private LocalDateTime creditResetAt;
 
+    @Column(name = "subscription_expired_at")
+    private LocalDateTime subscriptionExpiredAt;
+
     @CreationTimestamp
     @Column(name = "created_at")
     private LocalDateTime createdAt;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL,fetch = FetchType.LAZY)
-    private List<ImageHistory> histories;
+    private List<History> histories;
 }
