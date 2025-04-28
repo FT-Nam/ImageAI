@@ -1,0 +1,53 @@
+package com.ftnam.image_ai_backend.entity;
+
+import com.ftnam.image_ai_backend.enums.SubscriptionPlan;
+import jakarta.persistence.*;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.Pattern;
+import lombok.*;
+import org.hibernate.annotations.CreationTimestamp;
+
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.List;
+
+@Entity
+@Table(name = "user")
+@Getter
+@Setter
+@AllArgsConstructor
+@NoArgsConstructor
+@Builder
+public class User {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long Id;
+
+    private String name;
+
+    @Email
+    @Column(name = "email", unique = true)
+    private String email;
+
+    private String password;
+
+    @Column(name = "phone", length = 15, unique = true)
+    @Pattern(regexp = "^(\\+\\d{1,3})?[- .]?\\d{10,15}$")
+    private String phone;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "subscription")
+    private SubscriptionPlan subscription;
+
+    private int credit;
+
+    @Column(name = "credit_reset_at")
+    private LocalDateTime creditResetAt;
+
+    @CreationTimestamp
+    @Column(name = "created_at")
+    private LocalDateTime createdAt;
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL,fetch = FetchType.LAZY)
+    private List<ImageHistory> histories;
+}
