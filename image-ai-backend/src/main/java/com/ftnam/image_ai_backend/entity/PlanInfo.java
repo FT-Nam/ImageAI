@@ -10,9 +10,10 @@ import lombok.*;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class SubscriptionPlanInfo {
+public class PlanInfo {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
+    @Column(name = "plan_info_id")
     private Long id;
 
     @Enumerated(EnumType.STRING)

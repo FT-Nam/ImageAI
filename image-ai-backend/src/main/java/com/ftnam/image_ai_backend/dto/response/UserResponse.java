@@ -1,5 +1,6 @@
 package com.ftnam.image_ai_backend.dto.response;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.ftnam.image_ai_backend.enums.SubscriptionPlan;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -21,7 +22,9 @@ public class UserResponse {
 
     private int credit;
 
+    @JsonProperty("credit_reset_at")
     private LocalDateTime creditResetAt;
 
+    @JsonProperty("created_at")
     private LocalDateTime createdAt;
 }

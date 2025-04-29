@@ -8,6 +8,7 @@ import com.ftnam.image_ai_backend.enums.SubscriptionPlan;
 import com.ftnam.image_ai_backend.exception.AppException;
 import com.ftnam.image_ai_backend.exception.ErrorCode;
 import com.ftnam.image_ai_backend.mapper.UserMapper;
+import com.ftnam.image_ai_backend.repository.HistoryRepository;
 import com.ftnam.image_ai_backend.repository.UserRepository;
 import com.ftnam.image_ai_backend.service.UserService;
 import lombok.AccessLevel;
