@@ -13,7 +13,7 @@ import lombok.*;
 public class HistoryRequest {
     @NotNull
     @JsonProperty("user_id")
-    private Long userId;
+    private String userId;
 
     @NotBlank
     @JsonProperty("image_url")

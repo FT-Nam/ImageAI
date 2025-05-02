@@ -8,9 +8,9 @@ import java.util.List;
 public interface HistoryService {
     HistoryResponse createHistory(HistoryRequest request);
 
-    List<HistoryResponse> getHistoryByUser(Long userId);
+    List<HistoryResponse> getHistoryByUser(String userId);
 
-    void deleteHistory(Long id);
+    void deleteHistory(String id);
 
-    void deleteHistoryByUser(Long userId);
+    void deleteHistoryByUser(String userId);
 }

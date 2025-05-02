@@ -27,14 +27,14 @@ public class HistoryController {
     }
 
     @GetMapping("/userId")
-    ApiResponse<List<HistoryResponse>> getHistoryByUser(@PathVariable Long userId){
+    ApiResponse<List<HistoryResponse>> getHistoryByUser(@PathVariable String userId){
         return ApiResponse.<List<HistoryResponse>>builder()
                 .value(historyService.getHistoryByUser(userId))
                 .build();
     }
 
     @DeleteMapping("/id")
-    ApiResponse<Void> deleteHistory(@PathVariable Long id){
+    ApiResponse<Void> deleteHistory(@PathVariable String id){
         historyService.deleteHistory(id);
         return ApiResponse.<Void>builder()
                 .message("Delete history has been successfully")
@@ -42,7 +42,7 @@ public class HistoryController {
     }
 
     @DeleteMapping("/userId")
-    ApiResponse<Void> deleteHistoryByUser(@PathVariable Long userId){
+    ApiResponse<Void> deleteHistoryByUser(@PathVariable String userId){
         historyService.deleteHistoryByUser(userId);
         return ApiResponse.<Void>builder()
                 .message("Successfully cleared all user history")

@@ -35,19 +35,19 @@ public class HistoryServiceImpl implements HistoryService {
     }
 
     @Override
-    public List<HistoryResponse> getHistoryByUser(Long userId) {
+    public List<HistoryResponse> getHistoryByUser(String userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
         return user.getHistories().stream().map(historyMapper::toHistoryResponse).toList();
     }
 
     @Override
-    public void deleteHistory(Long id) {
+    public void deleteHistory(String id) {
         historyRepository.deleteById(id);
     }
 
     @Override
-    public void deleteHistoryByUser(Long userId) {
+    public void deleteHistoryByUser(String userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(()-> new AppException(ErrorCode.USER_NOT_EXISTED));
         historyRepository.deleteByUser(user);

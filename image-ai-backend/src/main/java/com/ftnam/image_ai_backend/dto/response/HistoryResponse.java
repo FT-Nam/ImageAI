@@ -14,7 +14,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 public class HistoryResponse {
     @JsonProperty("user_id")
-    private Long userId;
+    private String userId;
 
     @JsonProperty("image_url")
     private String imageUrl;

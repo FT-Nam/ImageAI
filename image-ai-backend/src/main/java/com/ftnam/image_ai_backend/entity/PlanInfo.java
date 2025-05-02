@@ -12,9 +12,9 @@ import lombok.*;
 @Builder
 public class PlanInfo {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.UUID)
     @Column(name = "plan_info_id")
-    private Long id;
+    String id;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "subscription")

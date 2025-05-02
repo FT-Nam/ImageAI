@@ -14,9 +14,8 @@ import lombok.experimental.FieldDefaults;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class FileMgmt {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "image_id")
-    Long id;
+    @Column(name = "file_id")
+    String id;
 
     @Column(name = "owner_id")
     String ownerId;
