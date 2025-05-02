@@ -9,7 +9,8 @@ import org.springframework.http.HttpStatusCode;
 @AllArgsConstructor
 public enum ErrorCode {
     ID_NOT_EXISTED(1001, "Id not existed", HttpStatus.NOT_FOUND),
-    USER_NOT_EXISTED(1002, "User not existed", HttpStatus.NOT_FOUND);
+    USER_NOT_EXISTED(1002, "User not existed", HttpStatus.NOT_FOUND),
+    INVALID_FILE_TYPE(1003, "Invalid file type. Only image files are allowed", HttpStatus.BAD_REQUEST);
 
     private final int code;
     private final String message;

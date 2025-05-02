@@ -12,7 +12,7 @@ import lombok.*;
 @Builder
 public class PlanInfo {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "plan_info_id")
     private Long id;
 
