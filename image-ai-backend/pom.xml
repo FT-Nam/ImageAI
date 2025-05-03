@@ -87,12 +87,12 @@
 			<artifactId>spring-security-test</artifactId>
 			<scope>test</scope>
 		</dependency>
-		<!-- https://mvnrepository.com/artifact/com.dropbox.core/dropbox-core-sdk -->
 		<dependency>
-			<groupId>com.dropbox.core</groupId>
-			<artifactId>dropbox-core-sdk</artifactId>
-			<version>7.0.0</version>
+			<groupId>io.github.openfeign.form</groupId>
+			<artifactId>feign-form-spring</artifactId>
+			<version>3.8.0</version>
 		</dependency>
+
 		<!-- https://mvnrepository.com/artifact/org.springframework.cloud/spring-cloud-starter-openfeign -->
 		<dependency>
 			<groupId>org.springframework.cloud</groupId>

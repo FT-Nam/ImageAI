@@ -23,6 +23,6 @@ public class HistoryRequest {
     private String result;
 
     @NotNull
-    private float confident;
+    private double confident;
 
 }

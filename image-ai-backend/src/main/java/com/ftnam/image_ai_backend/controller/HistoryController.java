@@ -26,14 +26,14 @@ public class HistoryController {
                 .build();
     }
 
-    @GetMapping("/userId")
+    @GetMapping("/userId/{userId}")
     ApiResponse<List<HistoryResponse>> getHistoryByUser(@PathVariable String userId){
         return ApiResponse.<List<HistoryResponse>>builder()
                 .value(historyService.getHistoryByUser(userId))
                 .build();
     }
 
-    @DeleteMapping("/id")
+    @DeleteMapping("/{id}")
     ApiResponse<Void> deleteHistory(@PathVariable String id){
         historyService.deleteHistory(id);
         return ApiResponse.<Void>builder()

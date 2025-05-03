@@ -28,7 +28,7 @@ public class History {
 
     private String result;
 
-    private float confident;
+    private double confident;
 
     @Column(name = "created_at")
     @CreationTimestamp

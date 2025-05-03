@@ -11,9 +11,11 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class AnalyzeResponse {
-    private String result;
+    private String prediction;
 
-    private double confidence;
+    private String description;
+
+    private double accuracy;
 
     @JsonProperty("image_url")
     private String imageUrl;

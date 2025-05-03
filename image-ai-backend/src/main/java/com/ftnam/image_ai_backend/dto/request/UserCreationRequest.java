@@ -17,7 +17,7 @@ public class UserCreationRequest {
     private String email;
 
     @NotBlank
-    @Size(min = 10)
+    @Size(min = 7)
     private String password;
 
     @Pattern(regexp = "^(\\+\\d{1,3})?[- .]?\\d{10,15}$")

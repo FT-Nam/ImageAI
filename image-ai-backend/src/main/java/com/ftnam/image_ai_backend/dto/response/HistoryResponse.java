@@ -21,7 +21,7 @@ public class HistoryResponse {
 
     private String result;
 
-    private float confident;
+    private double confident;
 
     @JsonProperty("created_at")
     private LocalDateTime createdAt;
