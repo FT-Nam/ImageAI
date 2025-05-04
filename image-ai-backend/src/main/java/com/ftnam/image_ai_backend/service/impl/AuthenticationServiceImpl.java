@@ -4,9 +4,11 @@ import com.ftnam.image_ai_backend.dto.request.AuthenticationRequest;
 import com.ftnam.image_ai_backend.dto.request.LogoutRequest;
 import com.ftnam.image_ai_backend.dto.request.RefreshRequest;
 import com.ftnam.image_ai_backend.dto.response.AuthenticationResponse;
+import com.ftnam.image_ai_backend.entity.RefreshTokenRedis;
 import com.ftnam.image_ai_backend.entity.User;
 import com.ftnam.image_ai_backend.exception.AppException;
 import com.ftnam.image_ai_backend.exception.ErrorCode;
+import com.ftnam.image_ai_backend.repository.RefreshTokenRedisRepository;
 import com.ftnam.image_ai_backend.repository.UserRepository;
 import com.ftnam.image_ai_backend.service.AuthenticationService;
 import com.nimbusds.jose.*;
@@ -26,6 +28,7 @@ import java.text.ParseException;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Date;
+import java.util.Optional;
 import java.util.UUID;
 
 @Slf4j
@@ -35,6 +38,7 @@ import java.util.UUID;
 public class AuthenticationServiceImpl implements AuthenticationService {
     PasswordEncoder passwordEncoder;
     UserRepository userRepository;
+    RefreshTokenRedisRepository refreshTokenRedisRepository;
 
     @Value("${jwt.signer-key}")
     String SIGNER_KEY;
@@ -64,9 +68,38 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     }
 
     @Override
-    public AuthenticationResponse refreshToken(RefreshRequest request) {
+    public AuthenticationResponse refreshToken(RefreshRequest request) throws ParseException, JOSEException {
+        var signedToken = verifyToken(request.getRefreshToken());
+        String jit = signedToken.getJWTClaimsSet().getJWTID();
+        Date expirationTime = signedToken.getJWTClaimsSet().getExpirationTime();
+        String userId = signedToken.getJWTClaimsSet().getSubject();
 
-        return null;
+        Optional<RefreshTokenRedis> storedToken = refreshTokenRedisRepository.findById(userId);
+        if(storedToken.isEmpty() || !storedToken.get().getToken().equals(request.getRefreshToken())){
+            log.error("Refresh token in redis is empty or invalid");
+            throw new AppException(ErrorCode.UNAUTHENTICATED);
+        }
+
+        refreshTokenRedisRepository.deleteById(userId);
+
+        var user = userRepository.findById(userId)
+                .orElseThrow(()-> new AppException(ErrorCode.USER_NOT_EXISTED));
+
+        String accessToken = generateToken(user, false);
+        String refreshToken = generateToken(user, true);
+
+        RefreshTokenRedis refreshTokenRedis = RefreshTokenRedis.builder()
+                .id(userId)
+                .token(refreshToken)
+                .expirationTime(REFRESHABLE_DURATION)
+                .build();
+
+        refreshTokenRedisRepository.save(refreshTokenRedis);
+
+        return AuthenticationResponse.builder()
+                .accessToken(accessToken)
+                .refreshToken(refreshToken)
+                .build();
     }
 
     @Override
