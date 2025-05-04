@@ -4,10 +4,12 @@ import com.ftnam.image_ai_backend.dto.request.AuthenticationRequest;
 import com.ftnam.image_ai_backend.dto.request.LogoutRequest;
 import com.ftnam.image_ai_backend.dto.request.RefreshRequest;
 import com.ftnam.image_ai_backend.dto.response.AuthenticationResponse;
+import com.ftnam.image_ai_backend.entity.InvalidatedToken;
 import com.ftnam.image_ai_backend.entity.RefreshTokenRedis;
 import com.ftnam.image_ai_backend.entity.User;
 import com.ftnam.image_ai_backend.exception.AppException;
 import com.ftnam.image_ai_backend.exception.ErrorCode;
+import com.ftnam.image_ai_backend.repository.InvalidatedTokenRepository;
 import com.ftnam.image_ai_backend.repository.RefreshTokenRedisRepository;
 import com.ftnam.image_ai_backend.repository.UserRepository;
 import com.ftnam.image_ai_backend.service.AuthenticationService;
@@ -39,6 +41,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     PasswordEncoder passwordEncoder;
     UserRepository userRepository;
     RefreshTokenRedisRepository refreshTokenRedisRepository;
+    InvalidatedTokenRepository invalidatedTokenRepository;
 
     @Value("${jwt.signer-key}")
     String SIGNER_KEY;
@@ -103,8 +106,20 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     }
 
     @Override
-    public void logout(LogoutRequest request) {
+    public void logout(LogoutRequest request) throws ParseException, JOSEException {
+        var signedToken = verifyToken(request.getAccessToken());
 
+        String userId = signedToken.getJWTClaimsSet().getSubject();
+        String jit = signedToken.getJWTClaimsSet().getJWTID();
+        Date expiryTime = signedToken.getJWTClaimsSet().getExpirationTime();
+
+        InvalidatedToken invalidatedToken = InvalidatedToken.builder()
+                .id(jit)
+                .expiryTime(expiryTime)
+                .build();
+
+        invalidatedTokenRepository.save(invalidatedToken);
+        refreshTokenRedisRepository.deleteById(userId);
     }
 
     private SignedJWT verifyToken(String token) throws JOSEException, ParseException {
