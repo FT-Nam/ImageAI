@@ -11,7 +11,8 @@ public enum ErrorCode {
     ID_NOT_EXISTED(1001, "Id not existed", HttpStatus.NOT_FOUND),
     USER_NOT_EXISTED(1002, "User not existed", HttpStatus.NOT_FOUND),
     INVALID_FILE_TYPE(1003, "Invalid file type. Only image files are allowed", HttpStatus.BAD_REQUEST),
-    FILE_NOT_FOUND(1004, "File not found", HttpStatus.NOT_FOUND);
+    FILE_NOT_FOUND(1004, "File not found", HttpStatus.NOT_FOUND),
+    UNAUTHENTICATED(1005, "Unauthenticated", HttpStatus.UNAUTHORIZED);
 
     private final int code;
     private final String message;

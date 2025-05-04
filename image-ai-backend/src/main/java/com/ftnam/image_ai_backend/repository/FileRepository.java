@@ -38,7 +38,7 @@ public class FileRepository {
         String fileExtension = StringUtils.getFilenameExtension(file.getOriginalFilename());
         String fileName = (fileExtension == null)
                 ? UUID.randomUUID().toString()
-                : UUID.randomUUID().toString() + "." +  fileExtension;
+                : UUID.randomUUID() + "." +  fileExtension;
 
         Path filePath = folder.resolve(fileName).normalize().toAbsolutePath();
 
