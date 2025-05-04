@@ -3,12 +3,14 @@ package com.ftnam.image_ai_backend.service.impl;
 import com.ftnam.image_ai_backend.dto.request.UserCreationRequest;
 import com.ftnam.image_ai_backend.dto.request.UserUpdateRequest;
 import com.ftnam.image_ai_backend.dto.response.UserResponse;
+import com.ftnam.image_ai_backend.entity.Role;
 import com.ftnam.image_ai_backend.entity.User;
 import com.ftnam.image_ai_backend.enums.SubscriptionPlan;
 import com.ftnam.image_ai_backend.exception.AppException;
 import com.ftnam.image_ai_backend.exception.ErrorCode;
 import com.ftnam.image_ai_backend.mapper.UserMapper;
 import com.ftnam.image_ai_backend.repository.HistoryRepository;
+import com.ftnam.image_ai_backend.repository.RoleRepository;
 import com.ftnam.image_ai_backend.repository.UserRepository;
 import com.ftnam.image_ai_backend.service.UserService;
 import lombok.AccessLevel;
@@ -20,6 +22,8 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.Date;
+import java.util.HashSet;
+import java.util.Set;
 
 @Service
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
@@ -27,6 +31,7 @@ import java.util.Date;
 public class UserServiceImpl implements UserService {
     UserRepository userRepository;
     UserMapper userMapper;
+    RoleRepository roleRepository;
 
     int creditInitial = 200;
 
@@ -36,6 +41,12 @@ public class UserServiceImpl implements UserService {
         user.setCredit(200);
         user.setSubscription(SubscriptionPlan.FREE);
         user.setCreditResetAt(LocalDateTime.now());
+
+        Role role = roleRepository.findById("USER")
+                .orElseThrow(()-> new AppException(ErrorCode.ROLE_NOT_EXISTED));
+
+        user.setRoles(Set.of(role));
+
         return userMapper.toUserResponse(userRepository.save(user));
     }
 

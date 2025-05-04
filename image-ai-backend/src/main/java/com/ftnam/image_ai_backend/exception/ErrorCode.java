@@ -15,7 +15,8 @@ public enum ErrorCode {
     UNAUTHENTICATED(1005, "Unauthenticated", HttpStatus.UNAUTHORIZED),
     USER_EXISTED(1006, "User existed", HttpStatus.BAD_REQUEST),
     ROLE_EXISTED(1007, "Role existed", HttpStatus.BAD_REQUEST),
-    PERMISSION_EXISTED(1008, "Permission existed", HttpStatus.BAD_REQUEST);
+    PERMISSION_EXISTED(1008, "Permission existed", HttpStatus.BAD_REQUEST),
+    ROLE_NOT_EXISTED(1009, "Role not existed", HttpStatus.NOT_FOUND);
 
     private final int code;
     private final String message;
