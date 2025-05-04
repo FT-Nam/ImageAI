@@ -2,11 +2,16 @@ package com.ftnam.image_ai_backend.service.impl;
 
 import com.ftnam.image_ai_backend.dto.request.HistoryRequest;
 import com.ftnam.image_ai_backend.dto.response.AnalyzeResponse;
+import com.ftnam.image_ai_backend.entity.User;
+import com.ftnam.image_ai_backend.exception.AppException;
+import com.ftnam.image_ai_backend.exception.ErrorCode;
 import com.ftnam.image_ai_backend.repository.PythonServiceClient;
+import com.ftnam.image_ai_backend.repository.UserRepository;
 import com.ftnam.image_ai_backend.service.AnalyzeService;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -19,6 +24,7 @@ public class AnalyzeServiceImpl implements AnalyzeService {
     FileServiceImpl fileService;
     HistoryServiceImpl historyService;
     PythonServiceClient pythonServiceClient;
+    UserRepository userRepository;
 
     @Override
     public AnalyzeResponse analyzeImage(MultipartFile file) throws IOException {
@@ -26,14 +32,23 @@ public class AnalyzeServiceImpl implements AnalyzeService {
 
         AnalyzeResponse predict = pythonServiceClient.predict(file);
 
-        HistoryRequest historyRequest = HistoryRequest.builder()
-                .imageUrl(upload.getUrl())
-                .confident(predict.getAccuracy())
-                .result(predict.getPrediction())
-                .userId("47bbd017-4a0e-4df3-a29f-b25995fb4d65")
-                .build();
+        String userId = SecurityContextHolder.getContext().getAuthentication().getName();
 
-        historyService.createHistory(historyRequest);
+        User user = userRepository.findById(userId)
+                .orElseThrow(()-> new AppException(ErrorCode.USER_NOT_EXISTED));
+
+        user.setCredit(user.getCredit() - 20);
+
+        if(!userId.equals("anonymousUser")){
+            HistoryRequest historyRequest = HistoryRequest.builder()
+                    .imageUrl(upload.getUrl())
+                    .confident(predict.getAccuracy())
+                    .result(predict.getPrediction())
+                    .userId(userId)
+                    .build();
+
+            historyService.createHistory(historyRequest);
+        }
 
         return AnalyzeResponse.builder()
                 .imageUrl(upload.getUrl())

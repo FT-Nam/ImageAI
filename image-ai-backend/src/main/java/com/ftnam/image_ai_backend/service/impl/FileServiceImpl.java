@@ -12,6 +12,7 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 //import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -31,8 +32,8 @@ public class FileServiceImpl implements FileService {
         var fileInfo = fileRepository.store(file);
 
         var fileMgmt = fileMgmtMapper.toFileMgmt(fileInfo);
-//        String userId = SecurityContextHolder.getContext().getAuthentication().getName();
-//        fileMgmt.setOwnerId(userId);
+        String userId = SecurityContextHolder.getContext().getAuthentication().getName();
+        fileMgmt.setOwnerId(userId);
 
         fileMgmtRepository.save(fileMgmt);
 
