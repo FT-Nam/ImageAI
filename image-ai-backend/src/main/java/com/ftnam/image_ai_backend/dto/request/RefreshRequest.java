@@ -1,5 +1,6 @@
 package com.ftnam.image_ai_backend.dto.request;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
@@ -10,6 +11,6 @@ import lombok.experimental.FieldDefaults;
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class RefreshRequest {
-    String accessToken;
+    @JsonProperty("refresh-token")
     String refreshToken;
 }

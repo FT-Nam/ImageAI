@@ -21,6 +21,7 @@ import com.nimbusds.jwt.SignedJWT;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import lombok.experimental.NonFinal;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -45,14 +46,17 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     RefreshTokenRedisRepository refreshTokenRedisRepository;
     InvalidatedTokenRepository invalidatedTokenRepository;
 
+    @NonFinal
     @Value("${jwt.signer-key}")
-    String SIGNER_KEY;
+    String signerKey;
 
+    @NonFinal
     @Value("${jwt.valid-duration}")
-    Long VALID_DURATION;
+    Long validDuration;
 
+    @NonFinal
     @Value("${jwt.refreshable-duration}")
-    Long REFRESHABLE_DURATION;
+    Long refreshableDuration;
 
     @Override
     public AuthenticationResponse login(AuthenticationRequest request) {
@@ -65,6 +69,14 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
         var accessToken = generateToken(user, false);
         var refreshToken = generateToken(user,true);
+
+        RefreshTokenRedis refreshTokenRedis = RefreshTokenRedis.builder()
+                .id(user.getId())
+                .token(refreshToken)
+                .expirationTime(refreshableDuration)
+                .build();
+
+        refreshTokenRedisRepository.save(refreshTokenRedis);
 
         return AuthenticationResponse.builder()
                 .accessToken(accessToken)
@@ -96,7 +108,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         RefreshTokenRedis refreshTokenRedis = RefreshTokenRedis.builder()
                 .id(userId)
                 .token(refreshToken)
-                .expirationTime(REFRESHABLE_DURATION)
+                .expirationTime(refreshableDuration)
                 .build();
 
         refreshTokenRedisRepository.save(refreshTokenRedis);
@@ -125,7 +137,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     }
 
     private SignedJWT verifyToken(String token) throws JOSEException, ParseException {
-        JWSVerifier verifier = new MACVerifier(SIGNER_KEY.getBytes());
+        JWSVerifier verifier = new MACVerifier(signerKey.getBytes());
 
         SignedJWT signedJWT = SignedJWT.parse(token);
 
@@ -144,7 +156,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     private String generateToken(User user, boolean isRefreshToken){
         JWSHeader header = new JWSHeader(JWSAlgorithm.HS512);
 
-        long expirationTime = isRefreshToken ? REFRESHABLE_DURATION : VALID_DURATION;
+        long expirationTime = isRefreshToken ? refreshableDuration : validDuration;
 
         JWTClaimsSet.Builder claimsSet = new JWTClaimsSet.Builder()
                 .subject(user.getId())
@@ -164,7 +176,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         JWSObject jwsObject = new JWSObject(header,payload);
 
         try {
-            jwsObject.sign(new MACSigner(SIGNER_KEY));
+            jwsObject.sign(new MACSigner(signerKey));
 
             return jwsObject.serialize();
         } catch (JOSEException e) {

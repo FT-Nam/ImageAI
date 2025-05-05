@@ -6,7 +6,7 @@ import org.springframework.cloud.openfeign.EnableFeignClients;
 import org.springframework.context.annotation.ComponentScan;
 
 @SpringBootApplication
-@ComponentScan(basePackages = "com.ftnam.image_ai_backend")
+//@ComponentScan(basePackages = "com.ftnam.image_ai_backend")
 @EnableFeignClients
 public class ImageAiBackendApplication {
 

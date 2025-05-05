@@ -18,6 +18,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -32,15 +33,17 @@ public class UserServiceImpl implements UserService {
     UserRepository userRepository;
     UserMapper userMapper;
     RoleRepository roleRepository;
+    PasswordEncoder passwordEncoder;
 
     int creditInitial = 200;
 
     @Override
     public UserResponse createUser(UserCreationRequest request) {
         User user = userMapper.toUser(request);
-        user.setCredit(200);
+        user.setCredit(creditInitial);
         user.setSubscription(SubscriptionPlan.FREE);
         user.setCreditResetAt(LocalDateTime.now());
+        user.setPassword(passwordEncoder.encode(request.getPassword()));
 
         Role role = roleRepository.findById("USER")
                 .orElseThrow(()-> new AppException(ErrorCode.ROLE_NOT_EXISTED));

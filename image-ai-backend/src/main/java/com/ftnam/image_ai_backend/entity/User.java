@@ -55,5 +55,6 @@ public class User {
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL,fetch = FetchType.LAZY)
     private List<History> histories;
 
+    @ManyToMany
     Set<Role> roles;
 }

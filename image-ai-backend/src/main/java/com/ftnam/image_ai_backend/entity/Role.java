@@ -1,6 +1,7 @@
 package com.ftnam.image_ai_backend.entity;
 
 import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.Table;
 import lombok.*;
@@ -15,6 +16,7 @@ import java.util.Set;
 @NoArgsConstructor
 @Builder
 public class Role {
+    @Id
     String name;
 
     String description;

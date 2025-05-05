@@ -22,18 +22,16 @@ spring:
     multipart:
       max-file-size: 5MB
       max-request-size: 5MB
-
-jwt:
-  signer-key: "3fc35280eaa58f16073a24ca3c5f0dd2d3ecbb6f89a3f013eba40c91bb775491"
-  valid-duration: 60
-  refreshable-duration: 180
-
+  redis:
+    host: localhost
+    port: 6379
+    password: ""
   jpa:
     hibernate:
       ddl-auto: update
   show-sql: true
 
-redis:
-  host: localhost
-  port: 6379
-  password: ""
+jwt:
+  signer-key: "3fc35280eaa58f16073a24ca3c5f0dd2d3ecbb6f89a3f013eba40c91bb775491"
+  valid-duration: 60
+  refreshable-duration: 180
