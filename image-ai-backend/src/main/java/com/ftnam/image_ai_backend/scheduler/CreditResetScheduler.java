@@ -1,7 +1,11 @@
 package com.ftnam.image_ai_backend.scheduler;
 
+import com.ftnam.image_ai_backend.entity.PlanInfo;
 import com.ftnam.image_ai_backend.entity.User;
 import com.ftnam.image_ai_backend.enums.SubscriptionPlan;
+import com.ftnam.image_ai_backend.exception.AppException;
+import com.ftnam.image_ai_backend.exception.ErrorCode;
+import com.ftnam.image_ai_backend.repository.PlanInfoRepository;
 import com.ftnam.image_ai_backend.repository.UserRepository;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -20,36 +24,39 @@ import java.util.List;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class CreditResetScheduler {
     UserRepository userRepository;
+    PlanInfoRepository planInfoRepository;
 
     @Scheduled(cron = "0 0 0 * * *")
     public void resetWeeklyCredit(){
         List<User> users = userRepository.findAll();
 
         for(User user : users){
+            boolean changed = false;
             LocalDateTime now = LocalDateTime.now();
 
             if(user.getSubscriptionExpiredAt() != null && now.isAfter(user.getSubscriptionExpiredAt())){
                 user.setSubscriptionExpiredAt(null);
                 user.setSubscription(SubscriptionPlan.FREE);
-                userRepository.save(user);
+                changed = true;
                 log.info("Subscription plan of user {} expired,reset free plan", user.getEmail());
             }
 
             boolean weeklyReset = Duration.between(user.getCreditResetAt(), now).toDays() >= 7;
 
             if (weeklyReset){
-                int creditSet = switch (user.getSubscription()){
-                    case PREMIUM -> 500;
-                    case PRO -> 1000;
-                    default -> 100;
-                };
+                PlanInfo planInfo = planInfoRepository.findBySubscription(user.getSubscription())
+                        .orElseThrow(()-> new AppException(ErrorCode.SUBSCRIPTION_NOT_EXISTED));
 
-                int newCredit = Math.min((user.getCredit() + creditSet), 5000);
+                int newCredit = Math.min((user.getCredit() + planInfo.getWeeklyCredit()), 5000);
 
                 user.setCredit(newCredit);
                 user.setCreditResetAt(LocalDateTime.now());
-                userRepository.save(user);
+                changed = true;
                 log.info("Reset credit of user {} sccessfully", user.getEmail());
+            }
+
+            if (changed) {
+                userRepository.save(user);
             }
         }
     }

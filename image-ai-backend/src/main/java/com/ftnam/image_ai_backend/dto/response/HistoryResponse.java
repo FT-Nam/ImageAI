@@ -13,6 +13,8 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 public class HistoryResponse {
+    private String id;
+
     @JsonProperty("user_id")
     private String userId;
 

@@ -5,12 +5,14 @@ import com.ftnam.image_ai_backend.dto.request.PaymentRequest;
 import com.ftnam.image_ai_backend.dto.response.PaymentReturnResponse;
 import com.ftnam.image_ai_backend.dto.response.PaymentCallbackResponse;
 import com.ftnam.image_ai_backend.entity.Order;
+import com.ftnam.image_ai_backend.entity.PlanInfo;
 import com.ftnam.image_ai_backend.entity.User;
 import com.ftnam.image_ai_backend.enums.OrderStatus;
 import com.ftnam.image_ai_backend.enums.SubscriptionPlan;
 import com.ftnam.image_ai_backend.exception.AppException;
 import com.ftnam.image_ai_backend.exception.ErrorCode;
 import com.ftnam.image_ai_backend.repository.OrderRepository;
+import com.ftnam.image_ai_backend.repository.PlanInfoRepository;
 import com.ftnam.image_ai_backend.repository.UserRepository;
 import com.ftnam.image_ai_backend.service.PaymentService;
 import jakarta.servlet.http.HttpServletRequest;
@@ -37,6 +39,7 @@ public class PaymentServiceImpl implements PaymentService {
     VnPayConfig vnPayConfig;
     UserRepository userRepository;
     OrderRepository orderRepository;
+    PlanInfoRepository planInfoRepository;
 
     @Override
     public String createPayment(PaymentRequest request, HttpServletRequest httpServletRequest) throws UnsupportedEncodingException {
@@ -183,14 +186,11 @@ public class PaymentServiceImpl implements PaymentService {
                                 User user = order.getUser();
                                 SubscriptionPlan plan = order.getSubscriptionPlan();
 
-                                int credit = switch (plan){
-                                    case PREMIUM -> 500;
-                                    case PRO -> 1000;
-                                    default -> 100;
-                                };
+                                PlanInfo planInfo = planInfoRepository.findBySubscription(plan)
+                                        .orElseThrow(()-> new AppException(ErrorCode.SUBSCRIPTION_NOT_EXISTED));
 
                                 user.setSubscription(plan);
-                                user.setCredit(user.getCredit() + credit);
+                                user.setCredit(user.getCredit() + planInfo.getWeeklyCredit());
                                 user.setSubscriptionExpiredAt(LocalDateTime.now().plusMonths(1));
                                 user.setCreditResetAt(LocalDateTime.now());
 

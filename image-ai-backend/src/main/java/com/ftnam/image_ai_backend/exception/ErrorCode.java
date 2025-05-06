@@ -18,7 +18,8 @@ public enum ErrorCode {
     PERMISSION_EXISTED(1008, "Permission existed", HttpStatus.BAD_REQUEST),
     ROLE_NOT_EXISTED(1009, "Role not existed", HttpStatus.NOT_FOUND),
     ORDER_NOT_EXISTED(1009, "Order not existed", HttpStatus.NOT_FOUND),
-    NOT_ENOUGH_CREDITS(1009, "Insufficient credits to analyze image", HttpStatus.PAYMENT_REQUIRED);
+    NOT_ENOUGH_CREDITS(1010, "Insufficient credits to analyze image", HttpStatus.PAYMENT_REQUIRED),
+    SUBSCRIPTION_NOT_EXISTED(1011, "Subscription not existed", HttpStatus.NOT_FOUND);
 
     private final int code;
     private final String message;

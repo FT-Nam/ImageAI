@@ -41,7 +41,7 @@ public class HistoryController {
                 .build();
     }
 
-    @DeleteMapping("/userId")
+    @DeleteMapping("/userId/{userId}")
     ApiResponse<Void> deleteHistoryByUser(@PathVariable String userId){
         historyService.deleteHistoryByUser(userId);
         return ApiResponse.<Void>builder()

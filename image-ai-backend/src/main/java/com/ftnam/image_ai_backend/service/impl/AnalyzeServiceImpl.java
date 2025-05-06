@@ -43,16 +43,14 @@ public class AnalyzeServiceImpl implements AnalyzeService {
 
         user.setCredit(user.getCredit() - 20);
 
-        if(!userId.equals("anonymousUser")){
-            HistoryRequest historyRequest = HistoryRequest.builder()
-                    .imageUrl(upload.getUrl())
-                    .confident(predict.getAccuracy())
-                    .result(predict.getPrediction())
-                    .userId(userId)
-                    .build();
+        HistoryRequest historyRequest = HistoryRequest.builder()
+                .imageUrl(upload.getUrl())
+                .confident(predict.getAccuracy())
+                .result(predict.getPrediction())
+                .userId(userId)
+                .build();
 
-            historyService.createHistory(historyRequest);
-        }
+        historyService.createHistory(historyRequest);
 
         return AnalyzeResponse.builder()
                 .imageUrl(upload.getUrl())
