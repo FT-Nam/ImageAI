@@ -10,7 +10,7 @@ import org.hibernate.annotations.CreationTimestamp;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "order")
+@Table(name = "orders")
 @Getter
 @Setter
 @AllArgsConstructor
@@ -22,9 +22,11 @@ public class Order {
     String code;
 
     @ManyToOne
+    @JoinColumn(name = "user_id")
     User user;
 
     @Column(name = "subscription_plan")
+    @Enumerated(EnumType.STRING)
     SubscriptionPlan subscriptionPlan;
 
     Long amount;

@@ -129,6 +129,7 @@ public class PaymentServiceImpl implements PaymentService {
         return  paymentUrl;
     }
 
+    // IPN VNPAY
     @Transactional
     public PaymentCallbackResponse paymentCallback(HttpServletRequest request){
         try
@@ -252,11 +253,9 @@ public class PaymentServiceImpl implements PaymentService {
     @Override
     public PaymentReturnResponse paymentReturn(HttpServletRequest request) throws UnsupportedEncodingException {
         Map fields = new HashMap();
-        for (Enumeration params = request.getParameterNames(); params.hasMoreElements(); ) {
-            String fieldName = null;
-            String fieldValue = null;
-            fieldName = URLEncoder.encode((String) params.nextElement(), StandardCharsets.US_ASCII.toString());
-            fieldValue = URLEncoder.encode(request.getParameter(fieldName), StandardCharsets.US_ASCII.toString());
+        for (Enumeration params = request.getParameterNames(); params.hasMoreElements();) {
+            String fieldName = (String) params.nextElement();
+            String fieldValue = request.getParameter(fieldName);
             if ((fieldValue != null) && (fieldValue.length() > 0)) {
                 fields.put(fieldName, fieldValue);
             }
@@ -281,7 +280,7 @@ public class PaymentServiceImpl implements PaymentService {
                         .build();
             } else {
                 return PaymentReturnResponse.builder()
-                        .success(true)
+                        .success(false)
                         .message("Successful failed")
                         .responseCode(request.getParameter("vnp_ResponseCode"))
                         .transactionCode(request.getParameter("vnp_TxnRef"))
@@ -290,7 +289,7 @@ public class PaymentServiceImpl implements PaymentService {
 
         } else {
             return PaymentReturnResponse.builder()
-                    .success(true)
+                    .success(false)
                     .message("Invalid signature")
                     .responseCode(request.getParameter("vnp_ResponseCode"))
                     .transactionCode(request.getParameter("vnp_TxnRef"))

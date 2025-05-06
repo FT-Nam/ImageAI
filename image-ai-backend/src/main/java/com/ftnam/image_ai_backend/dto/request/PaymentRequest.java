@@ -1,6 +1,9 @@
 package com.ftnam.image_ai_backend.dto.request;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.ftnam.image_ai_backend.enums.SubscriptionPlan;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
@@ -15,5 +18,8 @@ public class PaymentRequest {
     String bankCode;
     String ipAddress;
     String language;
+
+    @Enumerated(EnumType.STRING)
+    @JsonProperty("subscription_plan")
     SubscriptionPlan subscriptionPlan;
 }

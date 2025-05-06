@@ -13,7 +13,7 @@ import java.util.Objects;
 
 @Component
 public class CustomJwtDecoder implements JwtDecoder {
-    @Value("${jwt.signer-key")
+    @Value("${jwt.signer-key}")
     protected String SIGNER_KEY;
 
     private NimbusJwtDecoder nimbusJwtDecoder = null;
