@@ -191,6 +191,8 @@ public class PaymentServiceImpl implements PaymentService {
 
                                 user.setSubscription(plan);
                                 user.setCredit(user.getCredit() + credit);
+                                user.setSubscriptionExpiredAt(LocalDateTime.now().plusMonths(1));
+                                user.setCreditResetAt(LocalDateTime.now());
 
                                 order.setStatus(OrderStatus.SUCCESS);
 

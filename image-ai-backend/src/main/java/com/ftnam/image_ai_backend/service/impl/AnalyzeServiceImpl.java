@@ -37,6 +37,10 @@ public class AnalyzeServiceImpl implements AnalyzeService {
         User user = userRepository.findById(userId)
                 .orElseThrow(()-> new AppException(ErrorCode.USER_NOT_EXISTED));
 
+        if(user.getCredit() < 20){
+            throw new AppException(ErrorCode.NOT_ENOUGH_CREDITS);
+        }
+
         user.setCredit(user.getCredit() - 20);
 
         if(!userId.equals("anonymousUser")){
