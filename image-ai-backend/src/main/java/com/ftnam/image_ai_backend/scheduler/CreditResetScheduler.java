@@ -26,6 +26,7 @@ public class CreditResetScheduler {
     UserRepository userRepository;
     PlanInfoRepository planInfoRepository;
 
+    // Run in 00:00
     @Scheduled(cron = "0 0 0 * * *")
     public void resetWeeklyCredit(){
         List<User> users = userRepository.findAll();
