@@ -37,6 +37,7 @@ public class CreditResetScheduler {
             if(user.getSubscriptionExpiredAt() != null && now.isAfter(user.getSubscriptionExpiredAt())){
                 user.setSubscriptionExpiredAt(null);
                 user.setSubscription(SubscriptionPlan.FREE);
+                user.setCreditResetAt(LocalDateTime.now());
                 changed = true;
                 log.info("Subscription plan of user {} expired,reset free plan", user.getEmail());
             }

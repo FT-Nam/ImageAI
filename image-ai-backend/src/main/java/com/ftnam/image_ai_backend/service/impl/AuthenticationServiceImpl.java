@@ -67,6 +67,11 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         if(!authenticated)
             throw new AppException(ErrorCode.UNAUTHENTICATED);
 
+        Optional<RefreshTokenRedis> isHasRefreshToken = refreshTokenRedisRepository.findById(user.getId());
+        if(isHasRefreshToken.isPresent()){
+            refreshTokenRedisRepository.deleteById(user.getId());
+        }
+
         var accessToken = generateToken(user, false);
         var refreshToken = generateToken(user,true);
 
