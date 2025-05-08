@@ -23,6 +23,8 @@ public class HistoryResponse {
 
     private String result;
 
+    private String description;
+
     private double confident;
 
     @JsonProperty("created_at")

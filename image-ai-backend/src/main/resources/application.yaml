@@ -29,8 +29,8 @@ spring:
 
 jwt:
   signer-key: "3fc35280eaa58f16073a24ca3c5f0dd2d3ecbb6f89a3f013eba40c91bb775491"
-  valid-duration: 120
-  refreshable-duration: 240
+  valid-duration: 1800          # 30 phút
+  refreshable-duration: 604800  # 7 ngày
 
 vnpay:
   pay-url: "https://sandbox.vnpayment.vn/paymentv2/vpcpay.html"

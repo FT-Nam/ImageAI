@@ -20,6 +20,9 @@ public class HistoryRequest {
     private String imageUrl;
 
     @NotBlank
+    private String description;
+
+    @NotBlank
     private String result;
 
     @NotNull

@@ -26,6 +26,8 @@ public class History {
     @Column(name = "image_url")
     private String imageUrl;
 
+    private String description;
+
     private String result;
 
     private double confident;

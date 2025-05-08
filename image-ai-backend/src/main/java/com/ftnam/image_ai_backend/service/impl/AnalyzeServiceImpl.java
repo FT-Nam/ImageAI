@@ -52,6 +52,7 @@ public class AnalyzeServiceImpl implements AnalyzeService {
                     .imageUrl(upload.getUrl())
                     .confident(predict.getAccuracy())
                     .result(predict.getPrediction())
+                    .description(predict.getDescription())
                     .userId(userId)
                     .build();
 
