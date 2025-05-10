@@ -10,7 +10,7 @@ import java.io.UnsupportedEncodingException;
 public interface PaymentService {
     String createPayment(PaymentRequest request, HttpServletRequest httpServletRequest) throws UnsupportedEncodingException;
 
-    PaymentCallbackResponse paymentCallback(HttpServletRequest request);
+//    PaymentCallbackResponse paymentCallback(HttpServletRequest request);
 
     PaymentReturnResponse paymentReturn(HttpServletRequest request) throws UnsupportedEncodingException;
 }

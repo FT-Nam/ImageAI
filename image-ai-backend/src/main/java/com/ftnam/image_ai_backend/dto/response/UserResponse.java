@@ -22,6 +22,8 @@ public class UserResponse {
 
     private int credit;
 
+    private String phone;
+
     @JsonProperty("credit_reset_at")
     private LocalDateTime creditResetAt;
 

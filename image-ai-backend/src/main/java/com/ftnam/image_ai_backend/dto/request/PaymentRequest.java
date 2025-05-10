@@ -16,7 +16,6 @@ import lombok.experimental.FieldDefaults;
 public class PaymentRequest {
     long amount;
     String bankCode;
-    String ipAddress;
     String language;
 
     @Enumerated(EnumType.STRING)

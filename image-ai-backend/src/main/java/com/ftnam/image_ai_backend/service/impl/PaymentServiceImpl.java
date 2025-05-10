@@ -132,132 +132,140 @@ public class PaymentServiceImpl implements PaymentService {
         return  paymentUrl;
     }
 
-    // IPN VNPAY
-    @Transactional
-    public PaymentCallbackResponse paymentCallback(HttpServletRequest request){
-        try
-        {
-            // ex:  	PaymnentStatus = 0; pending
-            //              PaymnentStatus = 1; success
-            //              PaymnentStatus = 2; Faile
-
-            //Begin process return from VNPAY
-            Map fields = new HashMap();
-            for (Enumeration params = request.getParameterNames(); params.hasMoreElements();) {
-                String fieldName = URLEncoder.encode((String) params.nextElement(), StandardCharsets.US_ASCII.toString());
-                String fieldValue = URLEncoder.encode(request.getParameter(fieldName), StandardCharsets.US_ASCII.toString());
-                if ((fieldValue != null) && (fieldValue.length() > 0)) {
-                    fields.put(fieldName, fieldValue);
-                }
-            }
-
-            String vnp_SecureHash = request.getParameter("vnp_SecureHash");
-            if (fields.containsKey("vnp_SecureHashType"))
-            {
-                fields.remove("vnp_SecureHashType");
-            }
-            if (fields.containsKey("vnp_SecureHash"))
-            {
-                fields.remove("vnp_SecureHash");
-            }
-
-            // Check checksum
-            String signValue = vnPayConfig.hashAllFields(fields);
-            if (signValue.equals(vnp_SecureHash))
-            {
-                String orderCode = request.getParameter("vnp_TxnRef");
-                Order order = orderRepository.findById(orderCode).orElse(null);
-
-                boolean checkOrderId = order != null; // vnp_TxnRef exists in your database
-                boolean checkAmount = checkOrderId && (order.getAmount() * 100L == Long.parseLong(request.getParameter("vnp_Amount"))); // vnp_Amount is valid (Check vnp_Amount VNPAY returns compared to the
-                // amount of the code (vnp_TxnRef) in the Your database).
-                boolean checkOrderStatus = checkOrderId && order.getStatus() == OrderStatus.PENDING; // PaymnentStatus = 0 (pending)
-
-
-                if(checkOrderId)
-                {
-                    if(checkAmount)
-                    {
-                        if (checkOrderStatus)
-                        {
-                            if ("00".equals(request.getParameter("vnp_ResponseCode")))
-                            {
-                                //Here Code update PaymnentStatus = 1 into your Database
-                                User user = order.getUser();
-                                SubscriptionPlan plan = order.getSubscriptionPlan();
-
-                                PlanInfo planInfo = planInfoRepository.findBySubscription(plan)
-                                        .orElseThrow(()-> new AppException(ErrorCode.SUBSCRIPTION_NOT_EXISTED));
-
-                                user.setSubscription(plan);
-                                user.setCredit(user.getCredit() + planInfo.getWeeklyCredit());
-                                user.setSubscriptionExpiredAt(LocalDateTime.now().plusMonths(1));
-                                user.setCreditResetAt(LocalDateTime.now());
-
-                                order.setStatus(OrderStatus.SUCCESS);
-
-                                userRepository.save(user);
-                                orderRepository.save(order);
-                            }
-                            else
-                            {
-                                // Here Code update PaymnentStatus = 2 into your Database
-                                order.setStatus(OrderStatus.FAILED);
-                                orderRepository.save(order);
-                            }
-                            return PaymentCallbackResponse.builder()
-                                    .message("Confirm Success")
-                                    .rspCode("00")
-                                    .build();
-                        }
-                        else
-                        {
-                            return PaymentCallbackResponse.builder()
-                                    .rspCode("02")
-                                    .message("Order already confirmed")
-                                    .build();
-                        }
-                    }
-                    else
-                    {
-                        return PaymentCallbackResponse.builder()
-                                .rspCode("04")
-                                .message("Invalid Amount")
-                                .build();
-                    }
-                }
-                else
-                {
-                    return PaymentCallbackResponse.builder()
-                            .rspCode("01")
-                            .message("Order not Found")
-                            .build();
-                }
-            }
-            else
-            {
-                return PaymentCallbackResponse.builder()
-                        .message("Invalid Checksum")
-                        .rspCode("97")
-                        .build();
-            }
-        }
-        catch(Exception e)
-        {
-            log.error("Callback error: ", e);
-            return PaymentCallbackResponse.builder()
-                    .rspCode("99")
-                    .message("Unknow error")
-                    .build();
-        }
-    }
+//    // IPN VNPAY
+//    @Transactional
+//    public PaymentCallbackResponse paymentCallback(HttpServletRequest request){
+//        try
+//        {
+//            // ex:  	PaymnentStatus = 0; pending
+//            //              PaymnentStatus = 1; success
+//            //              PaymnentStatus = 2; Faile
+//
+//            //Begin process return from VNPAY
+//            Map fields = new HashMap();
+//            for (Enumeration params = request.getParameterNames(); params.hasMoreElements();) {
+//                String fieldName = URLEncoder.encode((String) params.nextElement(), StandardCharsets.US_ASCII.toString());
+//                String fieldValue = URLEncoder.encode(request.getParameter(fieldName), StandardCharsets.US_ASCII.toString());
+//                if ((fieldValue != null) && (fieldValue.length() > 0)) {
+//                    fields.put(fieldName, fieldValue);
+//                }
+//            }
+//
+//            String vnp_SecureHash = request.getParameter("vnp_SecureHash");
+//            if (fields.containsKey("vnp_SecureHashType"))
+//            {
+//                fields.remove("vnp_SecureHashType");
+//            }
+//            if (fields.containsKey("vnp_SecureHash"))
+//            {
+//                fields.remove("vnp_SecureHash");
+//            }
+//
+//            // Check checksum
+//            String signValue = vnPayConfig.hashAllFields(fields);
+//            if (signValue.equals(vnp_SecureHash))
+//            {
+//                String orderCode = request.getParameter("vnp_TxnRef");
+//                Order order = orderRepository.findById(orderCode).orElse(null);
+//
+//                boolean checkOrderId = order != null; // vnp_TxnRef exists in your database
+//                boolean checkAmount = checkOrderId && (order.getAmount() * 100L == Long.parseLong(request.getParameter("vnp_Amount"))); // vnp_Amount is valid (Check vnp_Amount VNPAY returns compared to the
+//                // amount of the code (vnp_TxnRef) in the Your database).
+//                boolean checkOrderStatus = checkOrderId && order.getStatus() == OrderStatus.PENDING; // PaymnentStatus = 0 (pending)
+//
+//
+//                if(checkOrderId)
+//                {
+//                    if(checkAmount)
+//                    {
+//                        if (checkOrderStatus)
+//                        {
+//                            if ("00".equals(request.getParameter("vnp_ResponseCode")))
+//                            {
+//                                //Here Code update PaymnentStatus = 1 into your Database
+//                                User user = order.getUser();
+//                                SubscriptionPlan plan = order.getSubscriptionPlan();
+//
+//                                PlanInfo planInfo = planInfoRepository.findBySubscription(plan)
+//                                        .orElseThrow(()-> new AppException(ErrorCode.SUBSCRIPTION_NOT_EXISTED));
+//
+//                                user.setSubscription(plan);
+//                                user.setCredit(user.getCredit() + planInfo.getWeeklyCredit());
+//                                user.setSubscriptionExpiredAt(LocalDateTime.now().plusMonths(1));
+//                                user.setCreditResetAt(LocalDateTime.now());
+//
+//                                order.setStatus(OrderStatus.SUCCESS);
+//
+//                                userRepository.save(user);
+//                                orderRepository.save(order);
+//                            }
+//                            else
+//                            {
+//                                // Here Code update PaymnentStatus = 2 into your Database
+//                                order.setStatus(OrderStatus.FAILED);
+//                                orderRepository.save(order);
+//                            }
+//                            return PaymentCallbackResponse.builder()
+//                                    .message("Confirm Success")
+//                                    .rspCode("00")
+//                                    .build();
+//                        }
+//                        else
+//                        {
+//                            return PaymentCallbackResponse.builder()
+//                                    .rspCode("02")
+//                                    .message("Order already confirmed")
+//                                    .build();
+//                        }
+//                    }
+//                    else
+//                    {
+//                        return PaymentCallbackResponse.builder()
+//                                .rspCode("04")
+//                                .message("Invalid Amount")
+//                                .build();
+//                    }
+//                }
+//                else
+//                {
+//                    return PaymentCallbackResponse.builder()
+//                            .rspCode("01")
+//                            .message("Order not Found")
+//                            .build();
+//                }
+//            }
+//            else
+//            {
+//                return PaymentCallbackResponse.builder()
+//                        .message("Invalid Checksum")
+//                        .rspCode("97")
+//                        .build();
+//            }
+//        }
+//        catch(Exception e)
+//        {
+//            log.error("Callback error: ", e);
+//            return PaymentCallbackResponse.builder()
+//                    .rspCode("99")
+//                    .message("Unknow error")
+//                    .build();
+//        }
+//    }
 
     @Override
     public PaymentReturnResponse paymentReturn(HttpServletRequest request) throws UnsupportedEncodingException {
         Map fields = new HashMap();
+
+
         for (Enumeration params = request.getParameterNames(); params.hasMoreElements();) {
-            String fieldName = (String) params.nextElement();
-            String fieldValue = request.getParameter(fieldName);
+            String fieldName = null;
+            String fieldValue = null;
+            try {
+                fieldName = URLEncoder.encode((String) params.nextElement(), StandardCharsets.US_ASCII.toString());
+                fieldValue = URLEncoder.encode(request.getParameter(fieldName), StandardCharsets.US_ASCII.toString());
+            } catch (UnsupportedEncodingException e) {
+                e.printStackTrace();
+            }
             if ((fieldValue != null) && (fieldValue.length() > 0)) {
                 fields.put(fieldName, fieldValue);
             }
@@ -274,6 +282,26 @@ public class PaymentServiceImpl implements PaymentService {
 
         if (signValue.equals(vnp_SecureHash)) {
             if ("00".equals(request.getParameter("vnp_ResponseCode"))) {
+                String orderCode = request.getParameter("vnp_TxnRef");
+                Order order = orderRepository.findById(orderCode)
+                        .orElseThrow(() -> new AppException(ErrorCode.ORDER_NOT_EXISTED));
+
+                User user = order.getUser();
+                SubscriptionPlan plan = order.getSubscriptionPlan();
+
+                PlanInfo planInfo = planInfoRepository.findBySubscription(plan)
+                      .orElseThrow(()-> new AppException(ErrorCode.SUBSCRIPTION_NOT_EXISTED));
+
+                user.setSubscription(plan);
+                user.setCredit(user.getCredit() + planInfo.getWeeklyCredit());
+                user.setSubscriptionExpiredAt(LocalDateTime.now().plusMonths(1));
+                user.setCreditResetAt(LocalDateTime.now());
+
+                order.setStatus(OrderStatus.SUCCESS);
+
+                userRepository.save(user);
+                orderRepository.save(order);
+
                 return PaymentReturnResponse.builder()
                         .success(true)
                         .message("Successful transaction")
@@ -281,6 +309,13 @@ public class PaymentServiceImpl implements PaymentService {
                         .transactionCode(request.getParameter("vnp_TxnRef"))
                         .build();
             } else {
+                String orderCode = request.getParameter("vnp_TxnRef");
+                Order order = orderRepository.findById(orderCode)
+                        .orElseThrow(() -> new AppException(ErrorCode.ORDER_NOT_EXISTED));
+
+                order.setStatus(OrderStatus.FAILED);
+                orderRepository.save(order);
+
                 return PaymentReturnResponse.builder()
                         .success(false)
                         .message("Successful failed")
@@ -290,6 +325,13 @@ public class PaymentServiceImpl implements PaymentService {
             }
 
         } else {
+            String orderCode = request.getParameter("vnp_TxnRef");
+            Order order = orderRepository.findById(orderCode)
+                    .orElseThrow(() -> new AppException(ErrorCode.ORDER_NOT_EXISTED));
+
+            order.setStatus(OrderStatus.FAILED);
+            orderRepository.save(order);
+
             return PaymentReturnResponse.builder()
                     .success(false)
                     .message("Invalid signature")

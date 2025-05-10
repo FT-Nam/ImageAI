@@ -34,7 +34,7 @@ jwt:
 
 vnpay:
   pay-url: "https://sandbox.vnpayment.vn/paymentv2/vpcpay.html"
-  return-url: "${VNPAY_RETURN_URI:http://localhost:8080/api/v1/payment/vnpay/return-url}"
+  return-url: "${VNPAY_RETURN_URI:http://localhost:3000/payment/return}"
   tmn-code: "OCP5JSX3"
   secret-key: "VYO09O0AQKQY0XFLKAVTKLDUM7CZ1TB8"
   api-url: "https://sandbox.vnpayment.vn/merchant_webapi/api/transaction"

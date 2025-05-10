@@ -29,12 +29,12 @@ public class PaymentController {
                 .build();
     }
 
-    @GetMapping("/vnpay/callback")
-    ApiResponse<PaymentCallbackResponse> paymentCallback(HttpServletRequest request){
-        return ApiResponse.<PaymentCallbackResponse>builder()
-                .value(paymentService.paymentCallback(request))
-                .build();
-    }
+//    @GetMapping("/vnpay/callback")
+//    ApiResponse<PaymentCallbackResponse> paymentCallback(HttpServletRequest request){
+//        return ApiResponse.<PaymentCallbackResponse>builder()
+//                .value(paymentService.paymentCallback(request))
+//                .build();
+//    }
 
     @GetMapping("/vnpay/return-url")
     ApiResponse<PaymentReturnResponse> paymentReturn(HttpServletRequest request)

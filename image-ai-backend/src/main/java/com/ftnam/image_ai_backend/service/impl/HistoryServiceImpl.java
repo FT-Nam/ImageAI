@@ -10,6 +10,7 @@ import com.ftnam.image_ai_backend.mapper.HistoryMapper;
 import com.ftnam.image_ai_backend.repository.HistoryRepository;
 import com.ftnam.image_ai_backend.repository.UserRepository;
 import com.ftnam.image_ai_backend.service.HistoryService;
+import jakarta.transaction.Transactional;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -47,6 +48,7 @@ public class HistoryServiceImpl implements HistoryService {
     }
 
     @Override
+    @Transactional
     public void deleteHistoryByUser(String userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(()-> new AppException(ErrorCode.USER_NOT_EXISTED));
