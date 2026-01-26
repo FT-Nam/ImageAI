@@ -1,21 +1,20 @@
 package com.ftnam.image_ai_backend.dto.response;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
+import lombok.experimental.FieldDefaults;
 
 @Getter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE)
 public class AnalyzeResponse {
-    private String prediction;
-
-    private String description;
-
-    private double accuracy;
+    String animal;
+    double animal_confidence;
+    String breed;
+    double breed_confidence;
+    String status;
 
     @JsonProperty("image_url")
     private String imageUrl;

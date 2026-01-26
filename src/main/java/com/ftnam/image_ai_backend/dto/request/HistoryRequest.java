@@ -20,12 +20,17 @@ public class HistoryRequest {
     private String imageUrl;
 
     @NotBlank
-    private String description;
-
-    @NotBlank
-    private String result;
+    private String animal;
 
     @NotNull
-    private double confident;
+    private double animal_confidence;
 
+    @NotBlank
+    private String breed;
+
+    @NotNull
+    private double breed_confidence;
+
+    @NotBlank
+    private String status;
 }

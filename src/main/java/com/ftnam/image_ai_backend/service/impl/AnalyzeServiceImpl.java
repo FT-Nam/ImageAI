@@ -57,9 +57,11 @@ public class AnalyzeServiceImpl implements AnalyzeService {
 
             HistoryRequest historyRequest = HistoryRequest.builder()
                     .imageUrl(upload.getUrl())
-                    .confident(predict.getAccuracy())
-                    .result(predict.getPrediction())
-                    .description(predict.getDescription())
+                    .animal(predict.getAnimal())
+                    .animal_confidence(predict.getAnimal_confidence())
+                    .breed(predict.getBreed())
+                    .breed_confidence(predict.getBreed_confidence())
+                    .status(predict.getStatus())
                     .userId(userId)
                     .build();
 
@@ -70,9 +72,11 @@ public class AnalyzeServiceImpl implements AnalyzeService {
 
         return AnalyzeResponse.builder()
                 .imageUrl(upload.getUrl())
-                .accuracy(predict.getAccuracy())
-                .description(predict.getDescription())
-                .prediction(predict.getPrediction())
+                .animal(predict.getAnimal())
+                .animal_confidence(predict.getAnimal_confidence())
+                .breed(predict.getBreed())
+                .breed_confidence(predict.getBreed_confidence())
+                .status(predict.getStatus())
                 .build();
     }
 
