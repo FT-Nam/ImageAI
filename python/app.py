@@ -1,84 +1,127 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
-import torch
-import torch.nn as nn
-from torchvision import transforms
+import tensorflow as tf
+import numpy as np
 from PIL import Image
+from tensorflow.keras.applications.efficientnet import preprocess_input
 
-# Tạo Flask app
+# =====================
+# App init
+# =====================
 app = Flask(__name__)
 CORS(app)
 
-# Định nghĩa lại mô hình đã huấn luyện
-class CatDogClassifier(nn.Module):
-    def __init__(self):
-        super(CatDogClassifier, self).__init__()
-        self.conv1 = nn.Conv2d(3, 32, kernel_size=3, padding=1)
-        self.bn1 = nn.BatchNorm2d(32)
-        self.conv2 = nn.Conv2d(32, 64, kernel_size=3, padding=1)
-        self.bn2 = nn.BatchNorm2d(64)
-        self.conv3 = nn.Conv2d(64, 128, kernel_size=3, padding=1)
-        self.bn3 = nn.BatchNorm2d(128)
-        self.pool = nn.MaxPool2d(2, 2)
-        self.fc1 = nn.Linear(128 * 18 * 18, 256)
-        self.fc2 = nn.Linear(256, 1)
-        self.dropout = nn.Dropout(0.5)
+# =====================
+# Load models
+# =====================
+dog_cat_other_model = tf.keras.models.load_model("dog_cat_other_model.keras")
+dog_breed_model = tf.keras.models.load_model("dog_breed_model.keras")
+cat_breed_model = tf.keras.models.load_model("cat_breed_model.keras")
 
-    def forward(self, x):
-        x = self.pool(torch.relu(self.bn1(self.conv1(x))))
-        x = self.pool(torch.relu(self.bn2(self.conv2(x))))
-        x = self.pool(torch.relu(self.bn3(self.conv3(x))))
-        x = x.view(-1, 128 * 18 * 18)
-        x = torch.relu(self.fc1(x))
-        x = self.dropout(x)
-        x = self.fc2(x)
-        return x
+# =====================
+# Thresholds
+# =====================
+ANIMAL_THRESHOLD = 0.6     # dog / cat / other
+BREED_HIGH = 0.75
+BREED_LOW = 0.6
 
+# =====================
+# Labels
+# =====================
+DOG_CAT_OTHER_LABELS = ["CAT", "DOG", "OTHER"]
 
-# Load mô hình đã train
-model_path = "improved_dog_cat_model.pth"
-model = CatDogClassifier()
-model.load_state_dict(torch.load(model_path, map_location=torch.device("cpu")))
-model.eval()
+DOG_BREEDS = [
+    "Afghan","Airedale","Basenji","Basset","Beagle","Bearded Collie",
+    "Bloodhound","Bluetick","Border Collie","Boston Terrier","Boxer","Bulldog","Cairn",
+    "Chihuahua","Chinese Crested","Chow","Collie","Corgi","Doberman","French Bulldog","German Shepherd",
+    "Golden Retriever","Great Dane","Greyhound","Japanese Spaniel","Labrador","Lhasa","Malinois","Maltese",
+    "Newfoundland","Pekinese","Pomeranian","Poodle","Pug","Rottweiler","Saint Bernard","Schnauzer",
+    "Scotch Terrier","Shar_Pei","Shiba Inu","Shih-Tzu","Siberian Husky","Yorkie"
+]
 
-# Transform ảnh
-transform = transforms.Compose([
-    transforms.Resize((150, 150)),
-    transforms.ToTensor(),
-    transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
-])
+CAT_BREEDS = [
+    "Abyssinian", "American Bobtail", "American Shorthair", "Bengal",
+    "Birman", "Bombay", "British Shorthair", "Egyptian Mau",
+    "Maine Coon", "Persian", "Ragdoll", "Russian Blue",
+    "Siamese", "Sphynx", "Tuxedo"
+]
 
-@app.route('/predict', methods=['POST'])
+# =====================
+# Preprocess
+# =====================
+def preprocess_image(image):
+    image = image.resize((224, 224))
+    img = np.array(image)
+    img = preprocess_input(img)
+    return np.expand_dims(img, axis=0)
+
+# =====================
+# Predict API
+# =====================
+@app.route("/predict", methods=["POST"])
 def predict():
-    if 'file' not in request.files:
-        return jsonify({'error': 'No file uploaded'}), 400
-
-    file = request.files['file']
+    if "file" not in request.files:
+        return jsonify({"error": "No file uploaded"}), 400
 
     try:
-        # Đọc và chuyển đổi ảnh
-        img = Image.open(file.stream).convert("RGB")
-        img = transform(img).unsqueeze(0)  # Thêm batch dimension
-    except Exception as e:
-        return jsonify({'error': 'Invalid image file'}), 400
+        image = Image.open(request.files["file"]).convert("RGB")
+    except:
+        return jsonify({"error": "Invalid image"}), 400
 
-    # Dự đoán
-    with torch.no_grad():
-        output = model(img)
-        prob = torch.sigmoid(output).item()  # Xác suất đầu ra
-        prediction = "Chó" if prob > 0.5 else "Mèo"
-        accuracy = int(prob * 100 if prob > 0.5 else (1 - prob) * 100)
-        description = (
-            "Là loài vật trung thành, gắn bó với con người, thường được nuôi làm bạn hoặc trông nhà."
-            if prediction == "Chó"
-            else "Là loài vật độc lập, tinh nghịch và đáng yêu, được yêu thích bởi sự nhẹ nhàng."
-        )
+    img = preprocess_image(image)
+
+    # ==================================================
+    # TẦNG 1: DOG / CAT / OTHER (softmax)
+    # ==================================================
+    preds = dog_cat_other_model.predict(img)[0]  # shape (3,)
+    idx = int(np.argmax(preds))
+    conf = float(preds[idx])
+
+    animal = DOG_CAT_OTHER_LABELS[idx]
+
+    # Reject OTHER hoặc low confidence
+    if animal == "OTHER" or conf < ANIMAL_THRESHOLD:
+        return jsonify({
+            "animal": "OTHER",
+            "animal_confidence": round(conf, 3),
+            "message": "Not a dog or cat"
+        })
+
+    # ==================================================
+    # TẦNG 2: BREED
+    # ==================================================
+    if animal == "DOG":
+        preds = dog_breed_model.predict(img)[0]
+        idx = int(np.argmax(preds))
+        conf = float(preds[idx])
+
+        if conf >= BREED_HIGH:
+            breed = DOG_BREEDS[idx]
+        elif conf >= BREED_LOW:
+            breed = DOG_BREEDS[idx] + " (likely)"
+        else:
+            breed = "DOG_MIXED_BREED"
+
+    else:  # CAT
+        preds = cat_breed_model.predict(img)[0]
+        idx = int(np.argmax(preds))
+        conf = float(preds[idx])
+
+        if conf >= BREED_HIGH:
+            breed = CAT_BREEDS[idx]
+        elif conf >= BREED_LOW:
+            breed = CAT_BREEDS[idx] + " (likely)"
+        else:
+            breed = "CAT_MIXED_BREED"
 
     return jsonify({
-        'prediction': prediction,
-        'description': description,
-        'accuracy': accuracy
+        "animal": animal,
+        "animal_confidence": round(conf, 3),
+        "breed": breed,
+        "breed_confidence": round(conf, 3),
+        "status": "SUCCESS"
     })
 
-if __name__ == '__main__':
-    app.run(debug=True)
+
+if __name__ == "__main__":
+    app.run(host="0.0.0.0", port=5000)
