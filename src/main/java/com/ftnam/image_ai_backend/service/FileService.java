@@ -10,4 +10,6 @@ public interface FileService {
     FileResponse uploadFile(MultipartFile file) throws IOException;
 
     FileData download(String fileName) throws IOException;
+
+    void deleteFile(String fileName) throws IOException;
 }

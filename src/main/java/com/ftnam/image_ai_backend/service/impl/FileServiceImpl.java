@@ -51,4 +51,10 @@ public class FileServiceImpl implements FileService {
         var resource = fileRepository.read(fileMgmt);
         return new FileData(fileMgmt.getContentType(),resource);
     }
+
+    @Override
+    public void deleteFile(String fileName) throws IOException {
+        fileMgmtRepository.deleteById(fileName);
+        fileRepository.delete(fileName);
+    }
 }
