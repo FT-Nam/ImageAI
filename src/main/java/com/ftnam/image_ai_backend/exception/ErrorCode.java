@@ -22,7 +22,10 @@ public enum ErrorCode {
     SUBSCRIPTION_NOT_EXISTED(1011, "Subscription not existed", HttpStatus.NOT_FOUND),
     CANNOT_SEND_EMAIL(1012, "Cannot send email", HttpStatus.NOT_FOUND),
     SERVICE_UNAVAILABLE(1013, "AI service is currently unavailable. Please try again later", HttpStatus.SERVICE_UNAVAILABLE),
-    INVALID_TRANSACTION(1014, "Invalid Transaction", HttpStatus.BAD_REQUEST);
+    INVALID_TRANSACTION(1014, "Invalid Transaction", HttpStatus.BAD_REQUEST),
+    DELETE_FILE_FAILED(1015, "Delete file failed", HttpStatus.BAD_REQUEST),
+    UPLOAD_FILE_FAILED(1015, "Upload file failed", HttpStatus.BAD_REQUEST);
+
 
     private final int code;
     private final String message;

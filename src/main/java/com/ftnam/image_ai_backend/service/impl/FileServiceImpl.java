@@ -1,5 +1,7 @@
 package com.ftnam.image_ai_backend.service.impl;
 
+import com.cloudinary.Cloudinary;
+import com.cloudinary.utils.ObjectUtils;
 import com.ftnam.image_ai_backend.dto.response.FileData;
 import com.ftnam.image_ai_backend.dto.response.FileResponse;
 import com.ftnam.image_ai_backend.exception.AppException;
@@ -17,6 +19,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor

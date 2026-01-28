@@ -17,6 +17,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.experimental.NonFinal;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.security.core.Authentication;
@@ -30,13 +31,26 @@ import java.io.IOException;
 @Slf4j
 @Service
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
-@RequiredArgsConstructor
 public class AnalyzeServiceImpl implements AnalyzeService {
     FileService fileService;
     HistoryService historyService;
     PythonServiceClient pythonServiceClient;
     UserRepository userRepository;
     NotificationPublisher notificationPublisher;
+
+    public AnalyzeServiceImpl(
+            @Qualifier("fileCloudinaryServiceImpl") FileService fileService,
+            HistoryService historyService,
+            PythonServiceClient pythonServiceClient,
+            UserRepository userRepository,
+            NotificationPublisher notificationPublisher
+    ) {
+        this.fileService = fileService;
+        this.historyService = historyService;
+        this.pythonServiceClient = pythonServiceClient;
+        this.userRepository = userRepository;
+        this.notificationPublisher = notificationPublisher;
+    }
 
     @NonFinal
     @Value("${app.analyze.credit-cost}")
@@ -63,7 +77,7 @@ public class AnalyzeServiceImpl implements AnalyzeService {
         }
 
         var upload = fileService.uploadFile(file);
-        String uploadedFileName = upload.getOriginalFileName();
+        String uploadedFileId = upload.getFileId();
         
         AnalyzeResponse predict;
         try {
@@ -72,9 +86,10 @@ public class AnalyzeServiceImpl implements AnalyzeService {
             log.error("Python service call failed: {}", e.getMessage(), e);
             // Rollback: Xóa file đã upload vì Python service fail
             try {
-                fileService.deleteFile(uploadedFileName);
+                fileService.deleteFile(uploadedFileId);
             } catch (IOException deleteException) {
-                log.error("Failed to delete uploaded file {}: {}", uploadedFileName, deleteException.getMessage());
+                log.error("Failed to delete uploaded file {}: {}",
+                        upload.getOriginalFileName(), deleteException.getMessage());
             }
             
             // Gửi notification cho user nếu có

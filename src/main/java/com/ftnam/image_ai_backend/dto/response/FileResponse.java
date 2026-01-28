@@ -10,6 +10,7 @@ import lombok.experimental.FieldDefaults;
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class FileResponse {
+    String fileId;
     @JsonProperty("original_file_name")
     String originalFileName;
     String url;
