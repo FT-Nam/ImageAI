@@ -21,7 +21,8 @@ public enum ErrorCode {
     NOT_ENOUGH_CREDITS(1010, "Insufficient credits to analyze image", HttpStatus.PAYMENT_REQUIRED),
     SUBSCRIPTION_NOT_EXISTED(1011, "Subscription not existed", HttpStatus.NOT_FOUND),
     CANNOT_SEND_EMAIL(1012, "Cannot send email", HttpStatus.NOT_FOUND),
-    SERVICE_UNAVAILABLE(1013, "AI service is currently unavailable. Please try again later", HttpStatus.SERVICE_UNAVAILABLE);
+    SERVICE_UNAVAILABLE(1013, "AI service is currently unavailable. Please try again later", HttpStatus.SERVICE_UNAVAILABLE),
+    INVALID_TRANSACTION(1014, "Invalid Transaction", HttpStatus.BAD_REQUEST);
 
     private final int code;
     private final String message;

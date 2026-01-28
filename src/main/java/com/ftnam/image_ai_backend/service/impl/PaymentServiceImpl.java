@@ -23,6 +23,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
@@ -257,9 +258,17 @@ public class PaymentServiceImpl implements PaymentService {
 //    }
 
     @Override
+    @Transactional
     public PaymentReturnResponse paymentReturn(HttpServletRequest request) throws UnsupportedEncodingException {
-        Map fields = new HashMap();
+        String orderCode = request.getParameter("vnp_TxnRef");
+        Order order = orderRepository.findById(orderCode)
+                .orElseThrow(() -> new AppException(ErrorCode.ORDER_NOT_EXISTED));
 
+        if(order.getStatus() != OrderStatus.PENDING){
+            throw new AppException(ErrorCode.INVALID_TRANSACTION);
+        }
+
+        Map fields = new HashMap();
 
         for (Enumeration params = request.getParameterNames(); params.hasMoreElements();) {
             String fieldName = null;
@@ -286,9 +295,7 @@ public class PaymentServiceImpl implements PaymentService {
 
         if (signValue.equals(vnp_SecureHash)) {
             if ("00".equals(request.getParameter("vnp_ResponseCode"))) {
-                String orderCode = request.getParameter("vnp_TxnRef");
-                Order order = orderRepository.findById(orderCode)
-                        .orElseThrow(() -> new AppException(ErrorCode.ORDER_NOT_EXISTED));
+
 
                 User user = order.getUser();
                 SubscriptionPlan plan = order.getSubscriptionPlan();
@@ -326,15 +333,11 @@ public class PaymentServiceImpl implements PaymentService {
 
                 return PaymentReturnResponse.builder()
                         .success(true)
-                        .message("Successful transaction")
+                        .message("Transaction successful")
                         .responseCode(request.getParameter("vnp_ResponseCode"))
                         .transactionCode(request.getParameter("vnp_TxnRef"))
                         .build();
             } else {
-                String orderCode = request.getParameter("vnp_TxnRef");
-                Order order = orderRepository.findById(orderCode)
-                        .orElseThrow(() -> new AppException(ErrorCode.ORDER_NOT_EXISTED));
-
                 User user = order.getUser();
                 order.setStatus(OrderStatus.FAILED);
                 orderRepository.save(order);
@@ -344,17 +347,13 @@ public class PaymentServiceImpl implements PaymentService {
 
                 return PaymentReturnResponse.builder()
                         .success(false)
-                        .message("Successful failed")
+                        .message("Transaction failed")
                         .responseCode(request.getParameter("vnp_ResponseCode"))
                         .transactionCode(request.getParameter("vnp_TxnRef"))
                         .build();
             }
 
         } else {
-            String orderCode = request.getParameter("vnp_TxnRef");
-            Order order = orderRepository.findById(orderCode)
-                    .orElseThrow(() -> new AppException(ErrorCode.ORDER_NOT_EXISTED));
-
             order.setStatus(OrderStatus.FAILED);
             orderRepository.save(order);
 
