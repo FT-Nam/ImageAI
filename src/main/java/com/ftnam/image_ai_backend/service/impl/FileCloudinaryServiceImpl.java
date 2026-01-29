@@ -47,7 +47,7 @@ public class FileCloudinaryServiceImpl implements FileService {
         FileMgmt fileMgmt = FileMgmt.builder()
                 .id((String) result.get("asset_id"))
                 .ownerId(userId)
-                .size((Long) result.get("bytes"))
+                .size((Integer) result.get("bytes"))
                 .contentType(result.get("resource_type") + "/" + result.get("format"))
                 .path((String) result.get("secure_url"))
                 .build();
