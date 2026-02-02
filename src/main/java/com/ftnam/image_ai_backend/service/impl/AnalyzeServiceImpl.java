@@ -1,6 +1,5 @@
 package com.ftnam.image_ai_backend.service.impl;
 
-import com.ftnam.image_ai_backend.dto.event.NotificationEvent;
 import com.ftnam.image_ai_backend.dto.request.HistoryRequest;
 import com.ftnam.image_ai_backend.dto.response.AnalyzeResponse;
 import com.ftnam.image_ai_backend.entity.User;
@@ -11,6 +10,7 @@ import com.ftnam.image_ai_backend.repository.UserRepository;
 import com.ftnam.image_ai_backend.service.AnalyzeService;
 import com.ftnam.image_ai_backend.service.FileService;
 import com.ftnam.image_ai_backend.service.HistoryService;
+import com.ftnam.image_ai_backend.util.NotificationSender;
 import feign.FeignException;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -19,7 +19,6 @@ import lombok.experimental.NonFinal;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -36,20 +35,20 @@ public class AnalyzeServiceImpl implements AnalyzeService {
     HistoryService historyService;
     PythonServiceClient pythonServiceClient;
     UserRepository userRepository;
-    NotificationPublisher notificationPublisher;
+    NotificationSender notificationSender;
 
     public AnalyzeServiceImpl(
             @Qualifier("fileCloudinaryServiceImpl") FileService fileService,
             HistoryService historyService,
             PythonServiceClient pythonServiceClient,
             UserRepository userRepository,
-            NotificationPublisher notificationPublisher
+            NotificationSender notificationSender
     ) {
         this.fileService = fileService;
         this.historyService = historyService;
         this.pythonServiceClient = pythonServiceClient;
         this.userRepository = userRepository;
-        this.notificationPublisher = notificationPublisher;
+        this.notificationSender = notificationSender;
     }
 
     @NonFinal
@@ -70,8 +69,9 @@ public class AnalyzeServiceImpl implements AnalyzeService {
             user = userRepository.findById(userId)
                     .orElseThrow(()-> new AppException(ErrorCode.USER_NOT_EXISTED));
 
+
             if(user.getCredit() < creditCost){
-                notificationPublisher.sendNotification(userId, "Insufficient credits to analyze image");
+                notificationSender.sendNotification(userId, "Insufficient credits to analyze image");
                 throw new AppException(ErrorCode.NOT_ENOUGH_CREDITS);
             }
         }
@@ -94,8 +94,7 @@ public class AnalyzeServiceImpl implements AnalyzeService {
             
             // Gửi notification cho user nếu có
             if(user != null){
-                notificationPublisher.sendNotification(userId, 
-                    "Image analysis failed due to service error. Please try again later.");
+                notificationSender.sendNotification(userId, "Image analysis failed due to service error. Please try again later.");
             }
             
             // Throw exception để rollback transaction (credit không bị trừ)
@@ -116,7 +115,7 @@ public class AnalyzeServiceImpl implements AnalyzeService {
                     .userId(userId)
                     .build();
 
-            notificationPublisher.sendNotification(userId, "Analyze image has been successfully");
+            notificationSender.sendNotification(userId, "Analyze image has been successfully");
             historyService.createHistory(historyRequest);
         }
 

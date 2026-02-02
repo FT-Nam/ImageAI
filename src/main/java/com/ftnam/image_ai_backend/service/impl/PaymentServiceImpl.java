@@ -15,6 +15,7 @@ import com.ftnam.image_ai_backend.repository.OrderRepository;
 import com.ftnam.image_ai_backend.repository.PlanInfoRepository;
 import com.ftnam.image_ai_backend.repository.UserRepository;
 import com.ftnam.image_ai_backend.service.PaymentService;
+import com.ftnam.image_ai_backend.util.NotificationSender;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -41,7 +42,7 @@ public class PaymentServiceImpl implements PaymentService {
     UserRepository userRepository;
     OrderRepository orderRepository;
     PlanInfoRepository planInfoRepository;
-    NotificationPublisher notificationPublisher;
+    NotificationSender notificationSender;
 
     KafkaTemplate<String,Object> kafkaTemplate;
 
@@ -296,7 +297,6 @@ public class PaymentServiceImpl implements PaymentService {
         if (signValue.equals(vnp_SecureHash)) {
             if ("00".equals(request.getParameter("vnp_ResponseCode"))) {
 
-
                 User user = order.getUser();
                 SubscriptionPlan plan = order.getSubscriptionPlan();
 
@@ -325,11 +325,8 @@ public class PaymentServiceImpl implements PaymentService {
 
                 kafkaTemplate.send("email-delivery", emailEvent);
 
-                notificationPublisher.sendNotification(user.getId(),
-                        "Payment successful! Subscription " + user.getSubscription().toString() + " is now active.");
-
-                notificationPublisher.sendNotification(user.getId(),
-                        "You have received " + planInfo.getWeeklyCredit() +  " credits. Start analyzing your images!");
+                notificationSender.sendNotification(user.getId(), "Payment successful! Subscription " + user.getSubscription().toString() + " is now active.");
+                notificationSender.sendNotification(user.getId(), "You have received " + planInfo.getWeeklyCredit() +  " credits. Start analyzing your images!");
 
                 return PaymentReturnResponse.builder()
                         .success(true)
@@ -342,8 +339,7 @@ public class PaymentServiceImpl implements PaymentService {
                 order.setStatus(OrderStatus.FAILED);
                 orderRepository.save(order);
 
-                notificationPublisher.sendNotification(user.getId(),
-                        "Payment failed!! Please try again later or contact support.");
+                notificationSender.sendNotification(user.getId(), "Payment failed!! Please try again later or contact support.");
 
                 return PaymentReturnResponse.builder()
                         .success(false)

@@ -4,17 +4,16 @@ import com.ftnam.image_ai_backend.dto.event.EmailEvent;
 import com.ftnam.image_ai_backend.dto.request.UserCreationRequest;
 import com.ftnam.image_ai_backend.dto.request.UserUpdateRequest;
 import com.ftnam.image_ai_backend.dto.response.UserResponse;
-import com.ftnam.image_ai_backend.entity.Notification;
 import com.ftnam.image_ai_backend.entity.Role;
 import com.ftnam.image_ai_backend.entity.User;
 import com.ftnam.image_ai_backend.enums.SubscriptionPlan;
 import com.ftnam.image_ai_backend.exception.AppException;
 import com.ftnam.image_ai_backend.exception.ErrorCode;
 import com.ftnam.image_ai_backend.mapper.UserMapper;
-import com.ftnam.image_ai_backend.repository.NotificationRepository;
 import com.ftnam.image_ai_backend.repository.RoleRepository;
 import com.ftnam.image_ai_backend.repository.UserRepository;
 import com.ftnam.image_ai_backend.service.UserService;
+import com.ftnam.image_ai_backend.util.NotificationSender;
 import jakarta.transaction.Transactional;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -39,8 +38,7 @@ public class UserServiceImpl implements UserService {
     UserMapper userMapper;
     RoleRepository roleRepository;
     PasswordEncoder passwordEncoder;
-    NotificationRepository notificationRepository;
-    NotificationPublisher notificationPublisher;
+    NotificationSender notificationSender;
     KafkaTemplate<String,Object> kafkaTemplate;
 
     @Value("${brevo.api-key}")
@@ -73,12 +71,7 @@ public class UserServiceImpl implements UserService {
 
         kafkaTemplate.send("email-delivery", emailEvent);
 
-        Notification notification = Notification.builder()
-                .content("Welcome aboard! Your account has been created successfully.")
-                .user(user)
-                .build();
-
-        notificationRepository.save(notification);
+        notificationSender.sendNotification(user.getId(), "Welcome aboard! Your account has been created successfully.");
 
         return userMapper.toUserResponse(userRepository.save(user));
     }
@@ -106,7 +99,7 @@ public class UserServiceImpl implements UserService {
             user.setPassword(encodedPassword);
         }
 
-        notificationPublisher.sendNotification(user.getId(), "Your profile has been update successfully");
+        notificationSender.sendNotification(user.getId(), "Your profile has been update successfully");
 
         return userMapper.toUserResponse(userRepository.save(user));
     }
